@@ -1,0 +1,115 @@
+
+This is not really a README file but a collection of developers' emails'
+snippets. In the best tradition of open sores that is! ;)
+
+x264transcode works in _completely unattended mode_ and is designed to run in
+the background. It rips ALL subtitles and ALL audio tracks and transcodes video
+to x264, profile 3.1, crf mode, with b-frames. Video stream is cropped (cropping
+uses twenty 200-frame samples across the entire length of the main feature).
+Chapters work. The container is MKV.
+
+Quickstart:
+
+Unpack, edit config (DEFAULT_OUTPUT and DEFAULT_FINAL_DESTINATION),
+save config to ~/.autoripper.conf (note the dots), run:
+
+	sh x264transcode.sh file.iso
+
+To create an iso from a disk you own, edit DEFAULT_ISO_STORAGE and 
+DEFAULT_DVD_RIPPING_DEVICE in the config and run:
+
+	ripper.sh
+
+Detailed info:
+
+There are multiple commands, each performing a separate task, the workflow is:
+
+inittab\
+  or    +-> autorip.py +-> ripper.sh --> iso files --> picked up by monitor.sh
+crontab/               \-> crippler.sh --> mp3 files
+
+		monitor.sh --> x264transcode.sh --> mkv file(s)
+
+in autorip.py:
+
+Note that "/org/freedesktop/Hal/devices/storage_model_SONY____CD_RW__CRX320E"
+string is specific to MY computer, you can get the correct value by running:
+
+	dbus-monitor --system
+
+and inserting a disk in the drive. Substitute whatever comes out of your
+dbus-monitor into both locations in the python script.
+
+You (may) need dbus-1-python (or dbus-python) and python-gobject2 (or
+python-gobject) dependencies for autorip.py to work.
+
+
+Other information:
+
+Script output goes to STDOUT, tools (mencoder etc) output go to STDERR.
+
+If you build and install the optional "crswallow" 
+( http://code.google.com/p/crswallow/ ) command somewhere in your $PATH, 
+it will swallow excess console output separated by carriage return -- it will 
+be filtered to one segment per requested period.
+
+Automated CRF adjustment works by reading the MPEG2 stream bitrate. 
+For maximum bitrate (9800 kBps) it leaves the CRF as it is and with
+each drop of 1700 kBps it increases CRF by one. Worst case scenario
+it will crank CRF up to 26. Please make sure you're happy with that sort
+of quality. To switch this feature on, adjust autoripper.conf variable
+DEFAULT_SOURCE_BASED_CRF to "1" or SOURCE_BASED_CRF 
+from command line. Be careful, this adjustment is made _on top_ of
+the quality setting (HIGH/MED/LOW).
+
+Runtime bash variables:
+
+NOCLEANUP=1 won't remove already extracted tracks on abort/error.
+
+NOPROGRESS=1 surpresses commands' output (-quiet).
+
+SAMPLING_DIVIDER allows using a fraction of title length to sample cropping.
+	Useful for dd_rescue'd isos.
+
+TITLES=ALL would pull all titles longer than one minute (i.e. TV series)
+
+Known bugs:
+
+	- No funny characters in file names. That means no spaces, no 
+		brackets, no garden gnomes. Bash hates that.
+
+
+All code is licensed under GNU GPL version 3 or later.
+
+FAQ:
+
+Q1: Why write another copy of handbrake?
+A1: x264transcode is NOT handbrake. Sure, they both archieve similar effect
+	(a dvd rip), but this script is to be run unattended. You can have
+	it fully automated if you wish to do so, or you can run it with the
+	iso image as it's only argument. Furthermore, it's specifically
+	targetted towards embedded media players (Popcorn Hour/TViX/WD HD).
+	The encoding settings are profile-strict and no experimental x264
+	options are used.
+
+Q2: How do I resume transcodes?
+A2: You must manually invoke a resume.
+
+If you had initially started without parameter 2 (the output name),
+you can resume later.
+
+When resuming, simply specify the prefix that was automatically chosen
+previously.
+
+If all data has been dumped already, you can even even specify a "dummy
+value" for the input device.
+
+./x264transcode.sh /dev/sr0
+
+[abort transcoding]
+
+ls => you learn prefix was disc_id_28374
+
+RESUME="1" ./x264transcode.sh DUMMY disc_id_28374
+
+
