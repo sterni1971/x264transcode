@@ -941,9 +941,9 @@ echo "Max ReFrames=$nREF"
 
     if [ "$SPECPROF" != "1" ]
     then
-	MENC_PROFILE="profile=${X264_PROFILE}:"
-    else
         MENC_PROFILE=""
+    else
+	MENC_PROFILE="profile=${X264_PROFILE}:"
     fi
 
     if [ -s "${OUTPUT}/${TITLE}.x264" ]
