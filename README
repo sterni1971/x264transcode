@@ -112,4 +112,10 @@ ls => you learn prefix was disc_id_28374
 
 RESUME="1" ./x264transcode.sh DUMMY disc_id_28374
 
+Q3: Encode dies with:
 
+Option x264encopts: Unknown suboption profile
+Option x264encopts: Bad argument nob_pyramid=(null)
+
+A3: Adjust DEFAULT_NO_B_PYRAMID in your config file. "b_pyramid=strict" is 
+    now a safe setting.
