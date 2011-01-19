@@ -50,6 +50,7 @@ DEFAULT_CRSWALLOW_ARGS="5 -out-to-stderr"
 DEFAULT_NO_B_PYRAMID="b_pyramid=strict"
 DEFAULT_THREADS="auto"
 DEFAULT_CRF="18"
+DEFAULT_SPECIFY_PROFILE="1"
 
 # Load configuration
 if (test -s /etc/autoripper.conf)
@@ -80,6 +81,7 @@ DEFAULT_CRSWALLOW_ARGS="5 -out-to-stderr"
 DEFAULT_NO_B_PYRAMID="b_pyramid=strict"
 DEFAULT_THREADS="auto"
 DEFAULT_CRF="18"
+DEFAULT_SPECIFY_PROFILE="1"
 EOF
 	. ~/.autoripper.conf && echo "Loaded ~/.autoripper.conf"
 fi
@@ -168,6 +170,11 @@ fi
 if (test -z "$DEINT")
 then
     DEINT="$DEFAULT_DEINT"
+fi
+
+if (test -z "$SPECIFY_PROFILE")
+then
+    SPECPROF="$DEFAULT_SPECIFY_PROFILE"
 fi
 
 if !(test -d "${OUTPUT}")
@@ -932,11 +939,18 @@ echo "Max ReFrames=$nREF"
     # on burning the subtitles into the stream anyway. If this happens, use "-sid 4096" instead,
     # it asks mplayer to use a subtitle stream ID that is well outside the usual range.
 
+    if [ "$SPECPROF" != "1" ]
+    then
+	MENC_PROFILE="profile=${X264_PROFILE}:"
+    else
+        MENC_PROFILE=""
+    fi
+
     if [ -s "${OUTPUT}/${TITLE}.x264" ]
     then
         echo "keeping existing file ${OUTPUT}/${TITLE}.x264"
     else
-        RUNARGS="-nosound -noautosub $ENDPOS $DUMPFROM -fps ${IFPS} -vf ${OPT_DTC}${OPT_VF_PP}${CROP}${OPT_VF_SCALE},harddup ${OPT_SWS} -ovc x264 -x264encopts threads=${THREADS}:crf=${TITLE_CRF}:level_idc=${X264_LEVEL}:frameref=$nREF:bframes=3:profile=${X264_PROFILE}:nodct_decimate:trellis=2:${NO_B_PYRAMID}:me=umh:mixed_refs:weight_b -ofps ${OFPS} -of rawvideo -o ${OUTPUT}/${TITLE}.x264.partial"
+        RUNARGS="-nosound -noautosub $ENDPOS $DUMPFROM -fps ${IFPS} -vf ${OPT_DTC}${OPT_VF_PP}${CROP}${OPT_VF_SCALE},harddup ${OPT_SWS} -ovc x264 -x264encopts threads=${THREADS}:crf=${TITLE_CRF}:level_idc=${X264_LEVEL}:frameref=$nREF:bframes=3:${MENC_PROFILE}nodct_decimate:trellis=2:${NO_B_PYRAMID}:me=umh:mixed_refs:weight_b -ofps ${OFPS} -of rawvideo -o ${OUTPUT}/${TITLE}.x264.partial"
         echo "mencoder $RUNARGS"
         if [ "$HAVE_CRSWALLOW" == "1" ]
         then
