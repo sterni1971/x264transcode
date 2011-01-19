@@ -119,3 +119,7 @@ Option x264encopts: Bad argument nob_pyramid=(null)
 
 A3: Adjust DEFAULT_NO_B_PYRAMID in your config file. "b_pyramid=strict" is 
     now a safe setting.
+
+Q4: Subtitles are getting 'burned in'
+A4: your mencoder ignores -noautosub (report it to mplayer developers!)
+    Add DEFAULT_MENCODER_SUBTITLE_QUIRK="-sid 4096" to your config file.

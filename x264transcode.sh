@@ -51,6 +51,7 @@ DEFAULT_NO_B_PYRAMID="b_pyramid=strict"
 DEFAULT_THREADS="auto"
 DEFAULT_CRF="18"
 DEFAULT_SPECIFY_PROFILE="1"
+DEFAULT_MENCODER_SUBTITLE_QUIRK="-sid 4096"
 
 # Load configuration
 if (test -s /etc/autoripper.conf)
@@ -82,6 +83,7 @@ DEFAULT_NO_B_PYRAMID="b_pyramid=strict"
 DEFAULT_THREADS="auto"
 DEFAULT_CRF="18"
 DEFAULT_SPECIFY_PROFILE="1"
+DEFAULT_MENCODER_SUBTITLE_QUIRK="-sid 4096"
 EOF
 	. ~/.autoripper.conf && echo "Loaded ~/.autoripper.conf"
 fi
@@ -175,6 +177,11 @@ fi
 if (test -z "$SPECIFY_PROFILE")
 then
     SPECPROF="$DEFAULT_SPECIFY_PROFILE"
+fi
+
+if (test -z "$MENCODER_SUBTITLE_QUIRK")
+then
+    MENCODER_SUBTITLE_QUIRK="$DEFAULT_MENCODER_SUBTITLE_QUIRK"
 fi
 
 if !(test -d "${OUTPUT}")
@@ -950,7 +957,7 @@ echo "Max ReFrames=$nREF"
     then
         echo "keeping existing file ${OUTPUT}/${TITLE}.x264"
     else
-        RUNARGS="-nosound -noautosub $ENDPOS $DUMPFROM -fps ${IFPS} -vf ${OPT_DTC}${OPT_VF_PP}${CROP}${OPT_VF_SCALE},harddup ${OPT_SWS} -ovc x264 -x264encopts threads=${THREADS}:crf=${TITLE_CRF}:level_idc=${X264_LEVEL}:frameref=$nREF:bframes=3:${MENC_PROFILE}nodct_decimate:trellis=2:${NO_B_PYRAMID}:me=umh:mixed_refs:weight_b -ofps ${OFPS} -of rawvideo -o ${OUTPUT}/${TITLE}.x264.partial"
+        RUNARGS="-nosound -noautosub $MENCODER_SUBTITLE_QUIRK $ENDPOS $DUMPFROM -fps ${IFPS} -vf ${OPT_DTC}${OPT_VF_PP}${CROP}${OPT_VF_SCALE},harddup ${OPT_SWS} -ovc x264 -x264encopts threads=${THREADS}:crf=${TITLE_CRF}:level_idc=${X264_LEVEL}:frameref=$nREF:bframes=3:${MENC_PROFILE}nodct_decimate:trellis=2:${NO_B_PYRAMID}:me=umh:mixed_refs:weight_b -ofps ${OFPS} -of rawvideo -o ${OUTPUT}/${TITLE}.x264.partial"
         echo "mencoder $RUNARGS"
         if [ "$HAVE_CRSWALLOW" == "1" ]
         then
