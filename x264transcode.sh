@@ -380,7 +380,8 @@ do
         MINUTES="`echo $TITLE_LENGTH|cut -d ':' -f 2|sed 's/0*\([0-9]\)/\1/'`"
         TITLE_LENGTH_SECONDS="$[${HOURS}*3600 + ${MINUTES}*60]"
     else #dumpfile
-        SECONDS_REAL="`mplayer -ss 1 -endpos 1 -identify -really-quiet -vo null -ao null $INPUT | grep ID_LENGTH | sed 's#ID_LENGTH=##' | sed 's# ##g'`"
+	#mplayer gives not for all ts files a correct result
+	SECONDS_REAL=$((`mediainfo --Inform='Video;%Duration%' $INPUT`/1000))
         TITLE_LENGTH_SECONDS=`echo $SECONDS_REAL | sed 's#\..*##'`
     fi
 
@@ -485,7 +486,7 @@ do
 
 	if [ "$PREDEFINED_CROP" != "" ]
 	then
-		CROP=",crop=${PREDEFINED_CROP}"
+		CROP="crop=${PREDEFINED_CROP}"
 		echo "Have CROP defined as $CROP, skipping detection."
 		Xc="`echo ${PREDEFINED_CROP}|cut -d ':' -f 1`"
 		Yc="`echo ${PREDEFINED_CROP}|cut -d ':' -f 2`"
@@ -540,7 +541,7 @@ do
       echo "Settled for $Xc $Yc $Wc $Hc."
     done
 
-    CROP=",crop=$Xc:$Yc:$Wc:$Hc"
+    CROP="crop=$Xc:$Yc:$Wc:$Hc"
 	fi
     echo $CROP
 
@@ -591,7 +592,8 @@ do
         fi
 
     else # 576p
-        OPT_VF_PP="pp=${DEINT}ha/va/dr"
+	#move the comma here at the end instead to the beginning of crop
+        OPT_VF_PP="pp=${DEINT}ha/va/dr,"
 
         if [ "$UPSAMPLE" == "false" ]
         then
